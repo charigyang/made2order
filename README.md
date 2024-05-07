@@ -6,7 +6,6 @@ Visual Geometry Group, Department of Engineering Science, University of Oxford
 
 ## Requirements
 ```pytorch```,
-```Pillow```,
 ```opencv```,
 ```einops```,
 ```tensorboardX```
@@ -14,7 +13,14 @@ Visual Geometry Group, Department of Engineering Science, University of Oxford
 
 ## How to use 
 
-We have included a demo on how to train on several datsets (RDS, MNIST and SVHN). Check `main.py`. The dataset should be downloaded automatically on the first run (or created on the fly, as in RDS). 
+To get started, 
+```
+python main.py
+```
+
+This should train the model on MNIST under default settings. You may visualise the training and attribution maps on Tensorboard.
+
+We have included a instructions on how to train on several datsets (RDS, MNIST and SVHN). Check `main.py`. The dataset should be downloaded automatically on the first run (or created on the fly, as in RDS). 
 
 Other datasets will be uploaded in due course.
 
