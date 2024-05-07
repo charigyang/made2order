@@ -1,6 +1,5 @@
 import einops
 import argparse
-import diffsort
 from tqdm import tqdm
 import random
 import torch
