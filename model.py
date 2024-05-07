@@ -3,14 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
-
-def to_cuda(x):
-    if torch.cuda.is_available():
-        return x.cuda()
-    return x
-
-def pair(t):
-    return t if isinstance(t, tuple) else (t, t)
+from utils import pair
 
 def posemb_sincos_3d(f, h, w, dim, device='cuda', temperature = 10000, dtype = torch.float32):
     z, y, x = torch.meshgrid(
@@ -162,16 +155,15 @@ class TransformerDecoder(nn.Module):
 class Made2Order(nn.Module):
     def __init__(
         self,
-        *,
         image_size,
         image_patch_size,
         frames,
-        frame_patch_size,
-        decoder_dim,
-        dim,
-        heads,
-        mlp_dim,
         channels = 3,
+        frame_patch_size = 1,
+        decoder_dim = 64,
+        dim = 256,
+        heads = 4,
+        mlp_dim = 512,
         dim_head = 64,
         dropout = 0.,
     ):
@@ -195,7 +187,6 @@ class Made2Order(nn.Module):
             nn.LayerNorm(dim)
         )
 
-
         self.pos_embedding = posemb_sincos_3d(frames, image_height // patch_height,image_width // patch_width,dim)
         self.pos_embedding = rearrange(self.pos_embedding, '(f hw) d -> 1 f hw d', f=frames)
 
@@ -211,7 +202,7 @@ class Made2Order(nn.Module):
             nn.Linear(dim, decoder_dim)
         )
 
-        self.query = torch.nn.Parameter(to_cuda(torch.randn(1, frames, decoder_dim)))
+        self.query = torch.nn.Parameter(torch.randn(1, frames, decoder_dim).cuda())
         self.decoder = TransformerDecoder(decoder_dim, 3, heads, dim_head, mlp_dim, dropout)
 
     def forward(self, video):
@@ -222,29 +213,23 @@ class Made2Order(nn.Module):
         b, f, h, w, d = x.shape
         x = rearrange(x, 'b f h w d -> b f (h w) d') + self.pos_embedding[:, :f]
   
-        #Transformer Encoder
+        #TE
         x = rearrange(x, 'b f n d -> (b f) n d')
         x = self.T1(x)
-        x = rearrange(x, '(b f) n d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> (b n) f d')
+        x = rearrange(x, '(b f) n d -> (b n) f d', b = b)
         x = self.T2(x)
-        x = rearrange(x, '(b n) f d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> (b f) n d')
+        x = rearrange(x, '(b f) n d -> (b n) f d', b = b)
         x = self.T3(x)
-        x = rearrange(x, '(b f) n d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> (b n) f d')
+        x = rearrange(x, '(b f) n d -> (b n) f d', b = b)
         x = self.T4(x)
-        x = rearrange(x, '(b n) f d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> (b f) n d')
+        x = rearrange(x, '(b f) n d -> (b n) f d', b = b)
         x = self.T5(x)
-        x = rearrange(x, '(b f) n d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> (b n) f d')
+        x = rearrange(x, '(b f) n d -> (b n) f d', b = b)
         x = self.T6(x)
-        x = rearrange(x, '(b n) f d -> b f n d', b = b)
-        x = rearrange(x, 'b f n d -> b (f n) d', b = b)
+        x = rearrange(x, '(b n) f d -> b (f n) d', b = b)
         te_output = self.projection_head(x)
 
-        #Transformer Decoder
+        #TD
         query = self.query.repeat(b,1,1)
         td_output = self.decoder(query, te_output)
 
@@ -254,5 +239,5 @@ class Made2Order(nn.Module):
         output = torch.einsum('bik,bjk->bij', te_output, td_output) 
         attn = rearrange(output, 'b (f n) d -> b f n d', f=f)
 
-        output = torch.max(attn, 2)[0]
-        return output, attn
+        output = torch.max(attn, 2)[0] /0.2
+        return output, torch.clip(attn,0,1)
