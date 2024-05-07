@@ -32,9 +32,7 @@ if __name__ == "__main__":
     #data and model
     data_loader_train, data_loader_valid, image_size, channels, image_patch_size = get_dataset(args)
     model = Made2Order(image_size=image_size, image_patch_size=image_patch_size,channels=channels, frames=args.num_compare).to(args.device)
-    
-    #print(sum(p.numel() for p in model.parameters() if p.requires_grad))
-    
+
     lr = args.lr
     optim = torch.optim.Adam(model.parameters(), lr=lr)
 
