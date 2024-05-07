@@ -14,9 +14,9 @@ Visual Geometry Group, Department of Engineering Science, University of Oxford
 
 ## How to use 
 
-We have included a demo on how to run on RDS, MNIST and SVHN. Check `main.py`
+We have included a demo on how to train on several datsets (RDS, MNIST and SVHN). Check `main.py`. The dataset should be downloaded automatically on the first run (or created on the fly, as in RDS).
 
-To run this on your own dataset, simply create a dataloader.
+To run this on your own dataset, simply create a dataloader of the same nature.
 
 ## Citation
 If you find this repository helpful, please consider citing our work:
