@@ -24,7 +24,7 @@ This should train the model on MNIST under default settings. You may visualise t
 
 We have included a instructions on how to train on several datsets (RDS, MNIST and SVHN). Check `main.py`. The dataset should be downloaded automatically on the first run (or created on the fly, as in RDS). 
 
-Other datasets will be uploaded in due course.
+Other datasets, see https://drive.google.com/file/d/1y0_2H_oCT4ixIGhmK64AlJzIYxHxId4W/view?usp=sharing
 
 To run this on your own dataset, simply create a dataloader of the same nature.
 
