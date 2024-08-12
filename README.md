@@ -2,7 +2,7 @@
 
 Charig Yang, Weidi Xie, Andrew Zisserman
 
-ECCV, 2024
+ECCV, 2024 (Oral Presentation)
 
 Visual Geometry Group, Department of Engineering Science, University of Oxford
 
